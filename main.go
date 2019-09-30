@@ -79,10 +79,12 @@ func (mounter Mounter) HandleVolumeEvent(msg events.Message) {
   volume_name := msg.Actor.ID
   plugin_name := msg.Actor.Attributes["driver"]
 
-  if msg.Action == "mount" {
-    mounter.MountVolume(volume_name, plugin_name)
-  } else {
-    mounter.UnmountVolume(volume_name)
+  if plugin_name != "local" {
+    if msg.Action == "mount" {
+      mounter.MountVolume(volume_name, plugin_name)
+    } else {
+      mounter.UnmountVolume(volume_name)
+    }
   }
 }
 
