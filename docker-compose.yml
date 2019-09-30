@@ -36,9 +36,12 @@ services:
       dockerfile: Dockerfile.starter
     environment:
       DOCKER_HOST: tcp://starter_docker:2375
+      MOUNTER_DOCKER_NETWORK: docker-volume-mounter_default
+      MOUNTER_DOCKER_HOST: tcp://prod_docker:2375
       IMAGE: docker-volume-mounter_prod
     depends_on:
       - starter_docker
+      - prod_docker
 
   starter_docker:
     image: tecnativa/docker-socket-proxy

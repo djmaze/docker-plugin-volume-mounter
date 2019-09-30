@@ -1,9 +1,15 @@
 #!/bin/sh
 
+if [ -n "$MOUNTER_DOCKER_NETWORK" ] && [ -n "$MOUNTER_DOCKER_HOST" ]; then
+  docker_opts="--network $MOUNTER_DOCKER_NETWORK -e DOCKER_HOST=$MOUNTER_DOCKER_HOST"
+else
+  docker_opts="-v /var/run/docker.sock:/var/run/docker.sock:ro"
+fi
+
 exec docker run -i --rm \
   --name docker-volume-mounter \
   --cap-add SYS_ADMIN \
-  -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -v /var/lib/docker/plugins:/var/lib/docker/plugins:ro \
   -v /mnt/docker-volumes:/mnt/docker-volumes:shared \
+  $docker_opts \
   "$IMAGE"
