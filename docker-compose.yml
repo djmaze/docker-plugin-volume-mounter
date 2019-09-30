@@ -6,8 +6,7 @@ services:
       context: .
       target: dev
     volumes:
-      - ./go:/go
-      - ./src:/go/src/github.com/djmaze/docker-plugin-volume-mounter
+      - .:/usr/src/app
 
   prod:
     build:
