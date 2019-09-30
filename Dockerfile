@@ -5,7 +5,7 @@ CMD ["go", "build"]
 FROM dev AS builder
 COPY go/src /go/src
 COPY src ./
-RUN CGO_ENABLED=0 GOOS=linux go build -tags netgo -ldflags "-s -w"
+RUN CGO_ENABLED=0 GOOS=linux go get -tags netgo -ldflags "-s -w"
 
 FROM alpine AS prod
 COPY start-container /usr/local/bin/
