@@ -92,3 +92,102 @@ depends_on:
   - amd64
   - arm
   - arm64
+
+---
+kind: pipeline
+type: docker
+name: starter-amd64
+
+platform:
+  arch: amd64
+
+steps:
+  - name: build
+    image: plugins/docker
+    settings:
+      auto_tag: true
+      auto_tag_suffix: amd64
+      repo: decentralize/docker-plugin-volume-mounter-starter
+      dockerfile: Dockerfile.starter
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+    when:
+      event:
+        exclude:
+          - pull_request
+
+---
+kind: pipeline
+type: docker
+name: starter-arm
+
+platform:
+  arch: arm
+
+steps:
+  - name: build
+    image: plugins/docker
+    settings:
+      auto_tag: true
+      auto_tag_suffix: arm
+      repo: decentralize/docker-plugin-volume-mounter-starter
+      dockerfile: Dockerfile.starter
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+    when:
+      event:
+        exclude:
+          - pull_request
+
+---
+kind: pipeline
+type: docker
+name: starter-arm64
+
+platform:
+  arch: arm64
+
+steps:
+  - name: build
+    image: plugins/docker
+    settings:
+      auto_tag: true
+      auto_tag_suffix: arm64
+      repo: decentralize/docker-plugin-volume-mounter-starter
+      dockerfile: Dockerfile.starter
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+    when:
+      event:
+        exclude:
+          - pull_request
+
+---
+kind: pipeline
+name: starter-manifest
+
+steps:
+  - name: manifest
+    image: plugins/manifest:1
+    settings:
+      spec: starter-manifest.tmpl
+      auto_tag: true
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      platforms:
+        - linux/amd64
+        - linux/arm
+        - linux/arm64
+
+depends_on:
+  - starter-amd64
+  - starter-arm
+  - starter-arm64
