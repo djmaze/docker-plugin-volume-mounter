@@ -1,0 +1,50 @@
+version: "3.7"
+
+services:
+  dev:
+    build:
+      context: .
+      target: dev
+    volumes:
+      - ./go:/go
+      - ./src:/go/src/github.com/djmaze/docker-plugin-volume-mounter
+
+  prod:
+    build:
+      context: .
+      target: prod
+    environment:
+      DOCKER_HOST: tcp://prod_docker:2375
+    cap_add:
+      - SYS_ADMIN
+    volumes:
+      - /var/lib/docker/plugins:/var/lib/docker/plugins:ro
+      - /mnt/docker-volumes:/mnt/docker-volumes:shared
+    depends_on:
+      - prod_docker
+
+  prod_docker:
+    image: tecnativa/docker-socket-proxy
+    environment:
+      PLUGINS: 1
+      VOLUMES: 1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  starter:
+    build:
+      context: .
+      dockerfile: Dockerfile.starter
+    environment:
+      DOCKER_HOST: tcp://starter_docker:2375
+      IMAGE: docker-volume-mounter_prod
+    depends_on:
+      - starter_docker
+
+  starter_docker:
+    image: tecnativa/docker-socket-proxy
+    environment:
+      CONTAINERS: 1
+      POST: 1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro

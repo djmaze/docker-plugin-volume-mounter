@@ -1,0 +1,3 @@
+FROM docker AS starter
+COPY start-container /usr/local/bin/
+CMD ["start-container"]

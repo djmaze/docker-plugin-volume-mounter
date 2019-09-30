@@ -1,0 +1,9 @@
+#!/bin/sh
+
+exec docker run -i --rm \
+  --name docker-volume-mounter \
+  --cap-add SYS_ADMIN \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v /var/lib/docker/plugins:/var/lib/docker/plugins:ro \
+  -v /mnt/docker-volumes:/mnt/docker-volumes:shared \
+  "$IMAGE"
