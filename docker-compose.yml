@@ -38,7 +38,7 @@ services:
       DOCKER_HOST: tcp://starter_docker:2375
       MOUNTER_DOCKER_NETWORK: docker-volume-mounter_default
       MOUNTER_DOCKER_HOST: tcp://prod_docker:2375
-      IMAGE: docker-volume-mounter_prod
+      IMAGE: decentralize/docker-plugin-volume-mounter
     depends_on:
       - starter_docker
       - prod_docker
@@ -47,6 +47,7 @@ services:
     image: tecnativa/docker-socket-proxy
     environment:
       CONTAINERS: 1
+      IMAGES: 1
       POST: 1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro

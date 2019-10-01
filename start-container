@@ -1,10 +1,13 @@
 #!/bin/sh
+set -eu
 
 if [ -n "$MOUNTER_DOCKER_NETWORK" ] && [ -n "$MOUNTER_DOCKER_HOST" ]; then
   docker_opts="--network $MOUNTER_DOCKER_NETWORK -e DOCKER_HOST=$MOUNTER_DOCKER_HOST"
 else
   docker_opts="-v /var/run/docker.sock:/var/run/docker.sock:ro"
 fi
+
+docker pull "$IMAGE"
 
 exec docker run -i --rm \
   --name docker-volume-mounter \
