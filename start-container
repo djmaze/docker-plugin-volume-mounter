@@ -1,8 +1,10 @@
 #!/bin/sh
 set -eu
 
-if [ -n "$MOUNTER_DOCKER_NETWORK" ] && [ -n "$MOUNTER_DOCKER_HOST" ]; then
+if [ -n "${MOUNTER_DOCKER_NETWORK:-}" ] && [ -n "${MOUNTER_DOCKER_HOST:-}" ]; then
   docker_opts="--network $MOUNTER_DOCKER_NETWORK -e DOCKER_HOST=$MOUNTER_DOCKER_HOST"
+elif [ -n "${MOUNTER_DOCKER_UNIX_SOCKET_VOLUME:-}" ]; then
+  docker_opts="-v $MOUNTER_DOCKER_UNIX_SOCKET_VOLUME:/var/run/docker-socket-proxy -e DOCKER_HOST=unix:///var/run/docker-socket-proxy/docker.sock"
 else
   docker_opts="-v /var/run/docker.sock:/var/run/docker.sock:ro"
 fi
