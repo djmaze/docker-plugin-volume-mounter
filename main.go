@@ -8,6 +8,7 @@ import (
   "os"
   "os/exec"
   "os/signal"
+  "syscall"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/events"
@@ -153,8 +154,8 @@ func main() {
   mounter := newMounter(cli)
   mounter.MountCurrentVolumes()
 
-  c := make(chan os.Signal, 1)
-  signal.Notify(c, os.Interrupt)
+  c := make(chan os.Signal, 2)
+  signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
   for {
     select {
