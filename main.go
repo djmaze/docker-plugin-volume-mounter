@@ -8,6 +8,7 @@ import (
   "os"
   "os/exec"
   "os/signal"
+  "strings"
   "syscall"
 
 	"github.com/docker/docker/api/types"
@@ -17,7 +18,8 @@ import (
 )
 
 const DOCKER_CLIENT_VERSION = "1.39"
-const PLUGIN_MOUNT_PATH_TEMPLATE = "/var/lib/docker/plugins/%s/propagated-mount/%s"
+const PLUGIN_ROOT_PATH_TEMPLATE = "/var/lib/docker/plugins/%s"
+const VOLUME_ROOT_PATH_TEMPLATE = PLUGIN_ROOT_PATH_TEMPLATE + "/propagated-mount"
 const API_TIMEOUT = 5000 * time.Millisecond
 const VolumePathRoot = "/mnt/docker-volumes"
 
@@ -47,9 +49,11 @@ func (mounter Mounter) MountCurrentVolumes() {
 
   for _, volume := range volumes.Volumes {
     if volume.Driver != "local" {
-      _, err := exec.Command("sh", "-c", "mount | grep " + volume.Mountpoint).Output()
+      volume_path := mounter.getVolumePath(ctx, volume)
+      fmt.Println("Checking for volume path " + volume_path)
+      _, err := exec.Command("sh", "-c", "mount | grep " + volume_path).Output()
       if err == nil {
-        mounter.MountVolume(volume.Name, volume.Driver)
+        mounter.MountVolume(ctx, volume)
       }
     }
   }
@@ -80,44 +84,34 @@ func (mounter Mounter) HandleVolumeEvent(msg events.Message) {
   volume_name := msg.Actor.ID
   plugin_name := msg.Actor.Attributes["driver"]
 
+  d := time.Now().Add(API_TIMEOUT)
+  ctx, cancel := context.WithDeadline(context.Background(), d)
+  defer cancel()
+
   if plugin_name != "local" {
     if msg.Action == "mount" {
-      mounter.MountVolume(volume_name, plugin_name)
+      volume := mounter.getVolumeByName(ctx, volume_name)
+      mounter.MountVolume(ctx, volume)
     } else {
       mounter.UnmountVolume(volume_name)
     }
   }
 }
 
-func (mounter Mounter) MountVolume(volumeName string, pluginName string) {
-  d := time.Now().Add(5000 * time.Millisecond)
+func (mounter Mounter) MountVolume(ctx context.Context, volume *types.Volume) {
+  d := time.Now().Add(API_TIMEOUT)
   ctx, cancel := context.WithDeadline(context.Background(), d)
   defer cancel()
 
-  // Get plugin id
-  plugin, _, err := mounter.cli.PluginInspectWithRaw(ctx, pluginName)
+  target_path := targetPath(volume.Name)
+  fmt.Printf("Bind-Mounting volume %s from %s to %s\n", volume.Name, volume.Mountpoint, target_path)
+
+  err := os.MkdirAll(target_path, 600)
   if err != nil {
     panic(err)
   }
 
-  // Get mountpoint
-  volume, err := mounter.cli.VolumeInspect(ctx, volumeName)
-  if err != nil {
-    panic(err)
-  }
-
-  volume_id := filepath.Base(volume.Mountpoint)
-  volume_path := fmt.Sprintf(PLUGIN_MOUNT_PATH_TEMPLATE, plugin.ID, volume_id)
-  target_path := targetPath(volumeName)
-
-  fmt.Printf("Bind-Mounting volume %s from %s to %s\n", volumeName, volume_path, target_path)
-
-  err = os.MkdirAll(target_path, 600)
-  if err != nil {
-    panic(err)
-  }
-
-  cmd := exec.Command("mount", "-obind", volume_path, target_path)
+  cmd := exec.Command("mount", "-obind", volume.Mountpoint, target_path)
   stdoutStderr, err := cmd.CombinedOutput()
   if err != nil {
     fmt.Printf("%s\n", stdoutStderr)
@@ -141,6 +135,40 @@ func (mounter Mounter) UnmountVolume(volumeName string) {
   }
 }
 
+func (mounter Mounter) getVolumeByName(ctx context.Context, volumeName string) *types.Volume {
+  volumes, err := mounter.cli.VolumeList(ctx, filters.Args {})
+  if err != nil {
+    panic(err)
+  }
+
+  for _, volume := range volumes.Volumes {
+    if volume.Name == volumeName {
+      return volume
+    }
+  }
+
+  panic("Could not find volume " + volumeName)
+}
+
+func (mounter Mounter) getVolumePath(ctx context.Context, volume *types.Volume) string {
+  plugin, _, err := mounter.cli.PluginInspectWithRaw(ctx, volume.Driver)
+  if err != nil {
+    panic(err)
+  }
+
+  volume_base_path := fmt.Sprintf(VOLUME_ROOT_PATH_TEMPLATE, plugin.ID)
+  volume_relative_path, err := filepath.Rel(volume_base_path, volume.Mountpoint)
+  if err != nil {
+    panic(err)
+  }
+
+  // use only first path component as mount dir
+  parts := strings.Split(volume_relative_path, "/")
+  volume_relative_path = parts[0]
+
+  return filepath.Join(volume_base_path, volume_relative_path)
+}
+
 func main() {
   cli, err := client.NewClientWithOpts(client.FromEnv, client.WithVersion(DOCKER_CLIENT_VERSION))
   if err != nil {
@@ -159,7 +187,7 @@ func main() {
 
   for {
     select {
-      case err := <-errs: fmt.Printf("%s\n", err)
+      case err := <-errs: fmt.Printf("Error: %s\n", err)
       case msg := <-msgs: mounter.HandleVolumeEvent(msg)
       case <-c:
         mounter.UnmountCurrentVolumes()
