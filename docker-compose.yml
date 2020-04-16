@@ -5,6 +5,7 @@ services:
     image: decentralize/docker-plugin-volume-mounter
     cap_add:
       - SYS_ADMIN
+    privileged: true
     volumes:
       - /mnt/docker-volumes:/mnt/docker-volumes:shared
       - /var/lib/docker/plugins:/var/lib/docker/plugins:ro

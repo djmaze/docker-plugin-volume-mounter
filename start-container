@@ -13,6 +13,7 @@ docker pull "$IMAGE"
 
 exec docker run -i --rm \
   --name docker-volume-mounter \
+  --privileged \
   --cap-add SYS_ADMIN \
   -v /var/lib/docker/plugins:/var/lib/docker/plugins:ro \
   -v /mnt/docker-volumes:/mnt/docker-volumes:shared \
