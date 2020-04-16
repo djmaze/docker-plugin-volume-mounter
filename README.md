@@ -22,6 +22,7 @@ This allows making consistent backups also in a Swarm cluster, e.g. with [Restic
 ```bash
 docker run -d --rm \
   --cap-add SYS_ADMIN \
+  --privileged \
   -v /mnt/docker-volumes:/mnt/docker-volumes:shared \
   -v /var/lib/docker/plugins:/var/lib/docker/plugins:ro \
   -v /var/run/docker.sock:/var/run/docker.sock \
