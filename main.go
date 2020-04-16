@@ -111,8 +111,15 @@ func (mounter Mounter) MountVolume(ctx context.Context, volume *types.Volume) {
     panic(err)
   }
 
-  cmd := exec.Command("mount", "-obind", volume.Mountpoint, target_path)
+  cmd := exec.Command("mount", "--bind", volume.Mountpoint, target_path)
   stdoutStderr, err := cmd.CombinedOutput()
+  if err != nil {
+    fmt.Printf("%s\n", stdoutStderr)
+    panic(err)
+  }
+
+  cmd = exec.Command("mount", "-obind,remount,ro", target_path)
+  stdoutStderr, err = cmd.CombinedOutput()
   if err != nil {
     fmt.Printf("%s\n", stdoutStderr)
     panic(err)
