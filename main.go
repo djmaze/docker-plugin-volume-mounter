@@ -60,7 +60,7 @@ func (mounter Mounter) MountCurrentVolumes() {
 }
 
 func (mounter Mounter) UnmountCurrentVolumes() {
-  _, err := exec.Command("sh", "-c", "mount | grep " + VolumePathRoot).Output()
+  _, err := exec.Command("sh", "-c", "mount | grep " + VolumePathRoot + "/").Output()
   if err == nil {
     _, err = exec.Command("sh", "-c", "umount " + filepath.Join(VolumePathRoot, "*")).Output()
     if err != nil {
