@@ -1,20 +1,20 @@
 package main
 
 import (
-  "context"
-  "fmt"
-  "time"
-  "path/filepath"
-  "os"
-  "os/exec"
-  "os/signal"
-  "strings"
-  "syscall"
+	"context"
+	"fmt"
+	"os"
+	"os/exec"
+	"os/signal"
+	"path/filepath"
+	"strings"
+	"syscall"
+	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/events"
 	"github.com/docker/docker/api/types/filters"
-  "github.com/docker/docker/client"
+	"github.com/docker/docker/client"
 )
 
 const DOCKER_CLIENT_VERSION = "1.39"
@@ -62,8 +62,6 @@ func (mounter Mounter) MountCurrentVolumes() {
 func (mounter Mounter) UnmountCurrentVolumes() {
   _, err := exec.Command("sh", "-c", "mount | grep " + VolumePathRoot).Output()
   if err == nil {
-    fmt.Println("TERM signal received. Unmounting volumes")
-
     _, err = exec.Command("sh", "-c", "umount " + filepath.Join(VolumePathRoot, "*")).Output()
     if err != nil {
       panic(err)
@@ -187,6 +185,11 @@ func main() {
   })
 
   mounter := newMounter(cli)
+
+	fmt.Println("Unmounting already mounted volumes")
+	mounter.UnmountCurrentVolumes()
+
+	fmt.Println("Mounting current volumes")
   mounter.MountCurrentVolumes()
 
   c := make(chan os.Signal, 2)
@@ -197,6 +200,7 @@ func main() {
       case err := <-errs: fmt.Printf("Error: %s\n", err)
       case msg := <-msgs: mounter.HandleVolumeEvent(msg)
       case <-c:
+				fmt.Println("TERM signal received. Unmounting volumes")
         mounter.UnmountCurrentVolumes()
         os.Exit(0)
     }
