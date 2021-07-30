@@ -75,7 +75,7 @@ name: manifest
 
 steps:
   - name: manifest
-    image: plugins/manifest:1
+    image: plugins/manifest:1.2
     settings:
       spec: manifest.tmpl
       auto_tag: true
@@ -174,7 +174,7 @@ name: starter-manifest
 
 steps:
   - name: manifest
-    image: plugins/manifest:1
+    image: plugins/manifest:1.2
     settings:
       spec: starter-manifest.tmpl
       auto_tag: true
