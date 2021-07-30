@@ -1,4 +1,4 @@
-FROM golang:1.12 AS dev
+FROM golang:1.16 AS dev
 WORKDIR /usr/src/app
 CMD ["go", "build"]
 
