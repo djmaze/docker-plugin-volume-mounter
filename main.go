@@ -49,6 +49,11 @@ func (mounter Mounter) MountCurrentVolumes() {
 
   for _, volume := range volumes.Volumes {
     if volume.Driver != "local" {
+			if _, err := os.Stat(volume.Mountpoint); os.IsNotExist(err) {
+			  fmt.Printf("Volume mountpoint %s does not exist, skipping volume %s\n", volume.Mountpoint, volume.Name)
+				continue
+			}
+
       volume_path := mounter.getVolumePath(ctx, volume)
       fmt.Println("Checking for volume path " + volume_path)
       _, err := exec.Command("sh", "-c", "mount | grep " + volume_path).Output()
