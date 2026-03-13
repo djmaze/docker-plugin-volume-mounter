@@ -11,9 +11,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/events"
 	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 )
 
@@ -42,7 +42,7 @@ func (mounter Mounter) MountCurrentVolumes() {
   ctx, cancel := context.WithDeadline(context.Background(), d)
   defer cancel()
 
-  volumes, err := mounter.cli.VolumeList(ctx, filters.Args {})
+  volumes, err := mounter.cli.VolumeList(ctx, volume.ListOptions {})
   if err != nil {
     panic(err)
   }
@@ -101,7 +101,7 @@ func (mounter Mounter) HandleVolumeEvent(msg events.Message) {
   }
 }
 
-func (mounter Mounter) MountVolume(ctx context.Context, volume *types.Volume) {
+func (mounter Mounter) MountVolume(ctx context.Context, volume *volume.Volume) {
   d := time.Now().Add(API_TIMEOUT)
   ctx, cancel := context.WithDeadline(context.Background(), d)
   defer cancel()
@@ -145,8 +145,8 @@ func (mounter Mounter) UnmountVolume(volumeName string) {
   }
 }
 
-func (mounter Mounter) getVolumeByName(ctx context.Context, volumeName string) *types.Volume {
-  volumes, err := mounter.cli.VolumeList(ctx, filters.Args {})
+func (mounter Mounter) getVolumeByName(ctx context.Context, volumeName string) *volume.Volume {
+  volumes, err := mounter.cli.VolumeList(ctx, volume.ListOptions {})
   if err != nil {
     panic(err)
   }
@@ -160,7 +160,7 @@ func (mounter Mounter) getVolumeByName(ctx context.Context, volumeName string) *
   panic("Could not find volume " + volumeName)
 }
 
-func (mounter Mounter) getVolumePath(ctx context.Context, volume *types.Volume) string {
+func (mounter Mounter) getVolumePath(ctx context.Context, volume *volume.Volume) string {
   plugin, _, err := mounter.cli.PluginInspectWithRaw(ctx, volume.Driver)
   if err != nil {
     panic(err)
@@ -185,7 +185,7 @@ func main() {
     panic(err)
   }
 
-  msgs, errs := cli.Events(context.Background(), types.EventsOptions {
+  msgs, errs := cli.Events(context.Background(), events.ListOptions {
     Filters: filters.NewArgs(filters.Arg("type", "volume")),
   })
 
