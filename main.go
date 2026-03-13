@@ -17,7 +17,7 @@ import (
 	"github.com/docker/docker/client"
 )
 
-const DOCKER_CLIENT_VERSION = "1.39"
+const DOCKER_CLIENT_VERSION = "1.53"
 const PLUGIN_ROOT_PATH_TEMPLATE = "/var/lib/docker/plugins/%s"
 const VOLUME_ROOT_PATH_TEMPLATE = PLUGIN_ROOT_PATH_TEMPLATE + "/propagated-mount"
 const API_TIMEOUT = 5000 * time.Millisecond
