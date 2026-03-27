@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.2](https://github.com/djmaze/docker-plugin-volume-mounter/tree/0.2.2) (2026-03-27)
+
+[Full Changelog](https://github.com/djmaze/docker-plugin-volume-mounter/compare/0.2.1...0.2.2)
+
+**Fixed bugs:**
+
+- fix: skip volumes with /rootfs mountpoint [\#18](https://github.com/djmaze/docker-plugin-volume-mounter/pull/18) ([djmaze](https://github.com/djmaze))
+- fix: pass DOCKER\_CLIENT\_VERSION to spawned container [\#17](https://github.com/djmaze/docker-plugin-volume-mounter/pull/17) ([djmaze](https://github.com/djmaze))
+
 ## [0.2.1](https://github.com/djmaze/docker-plugin-volume-mounter/tree/0.2.1) (2026-03-27)
 
 [Full Changelog](https://github.com/djmaze/docker-plugin-volume-mounter/compare/0.2.0...0.2.1)
