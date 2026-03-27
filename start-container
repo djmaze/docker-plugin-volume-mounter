@@ -9,6 +9,10 @@ else
   docker_opts="-v /var/run/docker.sock:/var/run/docker.sock:ro"
 fi
 
+if [ -n "${DOCKER_CLIENT_VERSION:-}" ]; then
+  docker_opts="$docker_opts -e DOCKER_CLIENT_VERSION=$DOCKER_CLIENT_VERSION"
+fi
+
 docker pull "$IMAGE"
 
 exec docker run -i --rm \
