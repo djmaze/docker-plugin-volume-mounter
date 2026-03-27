@@ -54,7 +54,7 @@ func (mounter Mounter) MountCurrentVolumes() {
 
   for _, volume := range volumes.Volumes {
     if volume.Driver != "local" {
-      if volume.Mountpoint == "" {
+      if strings.HasSuffix(volume.Mountpoint, "/rootfs") {
         fmt.Printf("Volume mountpoint is empty, skipping volume %s\n", volume.Name)
         continue
       }
