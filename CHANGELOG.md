@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.1](https://github.com/djmaze/docker-plugin-volume-mounter/tree/0.2.1) (2026-03-27)
+
+[Full Changelog](https://github.com/djmaze/docker-plugin-volume-mounter/compare/0.2.0...0.2.1)
+
+**Implemented enhancements:**
+
+- Get DOCKER\_CLIENT\_VERSION from env or use 1.53 as default [\#15](https://github.com/djmaze/docker-plugin-volume-mounter/pull/15) ([djmaze](https://github.com/djmaze))
+
+**Fixed bugs:**
+
+- Skip volumes with empty mountpoint [\#16](https://github.com/djmaze/docker-plugin-volume-mounter/pull/16) ([djmaze](https://github.com/djmaze))
+
 ## [0.2.0](https://github.com/djmaze/docker-plugin-volume-mounter/tree/0.2.0) (2026-03-13)
 
 [Full Changelog](https://github.com/djmaze/docker-plugin-volume-mounter/compare/0.1.3...0.2.0)
